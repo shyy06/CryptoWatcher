@@ -1,11 +1,15 @@
 # CryptoWatcher
+##更新情况：
+  2022年5月7日19:32:16：
+  由于联系不上原作者更新接口，所以自己拉了个分支。修改如下：
+  1.调整了接口地地址，不然没办法添加火币，采用的是火币的接口，后期如接口失效，会继续更新。如无法添加货币，请试下挂代理。
+  2.修改了虚拟币相关的词汇，摸鱼嘛，低调为主，不要太张扬了。
+不会发布版本，只能本地编译一下，然后附下载地址。
+`声明：非开发，不会改代码，连C#都是现场百度的`
 
 一个简单的虚拟货币盯盘程序，行情数据来源于火币交易所。
 
-[下载最新版本](https://github.com/whwlsfb/CryptoWatcher/releases/latest/download/CryptoWatcher.7z)
+[下载最新版本](https://mrlin.net/Wiki助手.zip)
 
 
-![图片](https://user-images.githubusercontent.com/8212964/130342761-a75edb40-ba86-42c5-8b29-d2363b3c45cc.png)
-
-
-![图片](https://user-images.githubusercontent.com/8212964/130342785-e5e47043-d2c9-4875-a495-bf48be40f36e.png)
+![图片](https://user-images.githubusercontent.com/5013989/167252367-f0088b59-27d4-4854-a70e-a0dffc8fe63a.png)

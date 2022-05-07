@@ -145,7 +145,7 @@ namespace CryptoWatcher
             // 
             // cacName
             // 
-            this.cacName.Text = "币币类型";
+            this.cacName.Text = "关注项目";
             this.cacName.Width = 120;
             // 
             // currentPrice
@@ -206,7 +206,7 @@ namespace CryptoWatcher
             this.ClientSize = new System.Drawing.Size(694, 374);
             this.Controls.Add(this.mainList);
             this.Name = "MainForm";
-            this.Text = "虚拟货币价格监视器";
+            this.Text = "Wiki助手";
             this.Deactivate += new System.EventHandler(this.MainForm_Deactivate);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_Load);

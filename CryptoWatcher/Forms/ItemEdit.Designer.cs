@@ -54,7 +54,7 @@ namespace CryptoWatcher.Forms
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(47, 12);
             this.label1.TabIndex = 0;
-            this.label1.Text = "虚拟币:";
+            this.label1.Text = "项目:";
             // 
             // label2
             // 
@@ -63,7 +63,7 @@ namespace CryptoWatcher.Forms
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(35, 12);
             this.label2.TabIndex = 1;
-            this.label2.Text = "法币:";
+            this.label2.Text = "基准:";
             // 
             // label3
             // 

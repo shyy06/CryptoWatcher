@@ -207,10 +207,10 @@ namespace CryptoWatcher
             this.Controls.Add(this.mainList);
             this.Name = "MainForm";
             this.Text = "Wiki助手";
-            this.Deactivate += new System.EventHandler(this.MainForm_Deactivate);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.frm_MouseDown);
+            this.Resize += new System.EventHandler(this.MainForm_Resize);
             this.iconMenu.ResumeLayout(false);
             this.listMenu.ResumeLayout(false);
             this.ResumeLayout(false);

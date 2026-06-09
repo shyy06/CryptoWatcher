@@ -1,5 +1,7 @@
-﻿using CryptoWatcher.Common;
+using CryptoWatcher.Common;
 using CryptoWatcher.Models;
+using Flurl.Http;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -15,16 +17,68 @@ namespace CryptoWatcher.Forms
     public partial class ItemEdit : Form
     {
         public CryptoItem Result;
+
+        /// <summary>
+        /// 离线兜底列表 — 仅当网络请求全部失败时使用
+        /// </summary>
+        private static readonly string[] FallbackCoins = new[]
+        {
+            "BTC", "ETH", "USDT", "BNB", "SOL",
+            "XRP", "USDC", "DOGE", "ADA", "TRX",
+            "TON", "AVAX", "LINK", "SHIB", "SUI",
+            "DOT", "BCH", "LTC", "NEAR", "UNI",
+        };
+
         public ItemEdit()
         {
             InitializeComponent();
+            // 先填入兜底列表占位，联网成功后会替换
+            cybermoneyName.Items.AddRange(FallbackCoins);
         }
 
-        public static CryptoItem Edit(CryptoItem old_item = null)
+        /// <summary>
+        /// 从 CoinCap API 获取市值 Top 20 币种列表
+        /// 失败时保留兜底列表
+        /// </summary>
+        private async Task LoadTopCoinsAsync()
+        {
+            try
+            {
+                var resp = await "https://api.coincap.io/v2/assets"
+                    .WithTimeout(TimeSpan.FromSeconds(5))
+                    .SetQueryParam("limit", 20)
+                    .GetStringAsync();
+
+                var data = JObject.Parse(resp)["data"] as JArray;
+                if (data != null && data.Count > 0)
+                {
+                    var symbols = new List<string>();
+                    foreach (var item in data)
+                    {
+                        string symbol = item["symbol"]?.ToString();
+                        if (!string.IsNullOrEmpty(symbol))
+                            symbols.Add(symbol.ToUpper());
+                    }
+
+                    cybermoneyName.Items.Clear();
+                    cybermoneyName.Items.AddRange(symbols.ToArray());
+                }
+            }
+            catch
+            {
+                // 网络不可用时保留兜底列表，无需处理
+            }
+        }
+
+        public static async Task<CryptoItem> Edit(CryptoItem old_item = null)
         {
             var form = new ItemEdit();
             if (old_item != null)
                 form.InitFromItem(old_item);
+
+            // 异步加载实时 Top 20
+            await form.LoadTopCoinsAsync();
+
             if (form.ShowDialog() == DialogResult.OK)
             {
                 return form.Result;

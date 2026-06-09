@@ -84,7 +84,10 @@ namespace CryptoWatcher.Common
                     UpdateStatus("...");
                     UpdateUI();
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    UpdateStatus($"请求失败: {ex.Message}");
+                }
             }
         }
         private void Notify(string title, string text)
@@ -95,11 +98,25 @@ namespace CryptoWatcher.Common
         }
         private void UpdateUI()
         {
-            Binding.SubItems[1].Text = CryptoItem.Price.ToString();
+            if (Binding.ListView != null && Binding.ListView.InvokeRequired)
+            {
+                Binding.ListView.Invoke((MethodInvoker)(() => Binding.SubItems[1].Text = CryptoItem.Price.ToString()));
+            }
+            else
+            {
+                Binding.SubItems[1].Text = CryptoItem.Price.ToString();
+            }
         }
         private void UpdateStatus(string msg)
         {
-            Binding.SubItems[3].Text = msg;
+            if (Binding.ListView != null && Binding.ListView.InvokeRequired)
+            {
+                Binding.ListView.Invoke((MethodInvoker)(() => Binding.SubItems[3].Text = msg));
+            }
+            else
+            {
+                Binding.SubItems[3].Text = msg;
+            }
         }
     }
 }

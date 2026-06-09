@@ -33,16 +33,22 @@ namespace CryptoWatcher
             this.notifyIcon.Visible = false;
         }
 
-        private void MainForm_Deactivate(object sender, EventArgs e)
+        /// <summary>
+        /// 使用 Resize 事件代替 Deactivate，可靠地实现最小化到托盘
+        /// </summary>
+        private void MainForm_Resize(object sender, EventArgs e)
         {
             if (WindowState == FormWindowState.Minimized)
+            {
                 Hide();
+            }
         }
 
         private void notifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             Show();
             WindowState = FormWindowState.Normal;
+            Activate();
         }
         #endregion
         #region 窗口拖动
@@ -117,6 +123,15 @@ namespace CryptoWatcher
 
         protected override void WndProc(ref Message m)
         {
+            // 可靠拦截最小化消息，改为隐藏到系统托盘
+            const int WM_SYSCOMMAND = 0x0112;
+            const int SC_MINIMIZE = 0xF020;
+            if (m.Msg == WM_SYSCOMMAND && m.WParam.ToInt32() == SC_MINIMIZE)
+            {
+                Hide();
+                return;
+            }
+
             if (minMode.Checked)
                 switch (m.Msg)
                 {
@@ -203,17 +218,17 @@ namespace CryptoWatcher
                 }
             }
         }
-        private void list_add_Click(object sender, EventArgs e)
+        private async void list_add_Click(object sender, EventArgs e)
         {
-            appendItem(ItemEdit.Edit());
+            appendItem(await ItemEdit.Edit());
         }
 
-        private void list_modify_Click(object sender, EventArgs e)
+        private async void list_modify_Click(object sender, EventArgs e)
         {
             if (mainList.SelectedItems.Count > 0)
             {
                 var listItem = mainList.SelectedItems[0];
-                var newItem = ItemEdit.Edit(listItem.Tag as CryptoItem);
+                var newItem = await ItemEdit.Edit(listItem.Tag as CryptoItem);
                 if (newItem != null)
                 {
                     var key = newItem.Key;

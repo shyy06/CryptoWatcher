@@ -1,4 +1,4 @@
-﻿
+
 namespace CryptoWatcher.Forms
 {
     partial class ItemEdit
@@ -33,7 +33,7 @@ namespace CryptoWatcher.Forms
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.cybermoneyName = new System.Windows.Forms.TextBox();
+            this.cybermoneyName = new System.Windows.Forms.ComboBox();
             this.currencyName = new System.Windows.Forms.TextBox();
             this.refreshInterval = new System.Windows.Forms.NumericUpDown();
             this.saveBtn = new System.Windows.Forms.Button();
@@ -204,7 +204,7 @@ namespace CryptoWatcher.Forms
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TextBox cybermoneyName;
+        private System.Windows.Forms.ComboBox cybermoneyName;
         private System.Windows.Forms.TextBox currencyName;
         private System.Windows.Forms.NumericUpDown refreshInterval;
         private System.Windows.Forms.Button saveBtn;

@@ -1,0 +1,78 @@
+<Window x:Class="CryptoWatcher.MiniWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="CryptoWatcher 迷你窗"
+        Width="330" SizeToContent="Height"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize" ShowInTaskbar="False"
+        WindowStartupLocation="Manual"
+        Topmost="True"
+        FontFamily="Segoe UI" FontSize="13"
+        TextOptions.TextFormattingMode="Display"
+        UseLayoutRounding="True">
+
+    <Window.ContextMenu>
+        <ContextMenu>
+            <MenuItem Header="恢复主界面" Click="Restore_Click" />
+            <Separator />
+            <MenuItem x:Name="LockItem" Header="锁定位置" IsCheckable="True" Click="Lock_Click" />
+            <MenuItem x:Name="ThroughItem" Header="鼠标穿透" IsCheckable="True" Click="Through_Click" />
+            <Separator />
+            <MenuItem Header="退出程序" Click="Exit_Click" />
+        </ContextMenu>
+    </Window.ContextMenu>
+
+    <Border x:Name="Card" Margin="16" CornerRadius="12"
+            Background="#FFFFFF" Padding="14,10,14,12">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="22" ShadowDepth="2" Opacity="0.18" Color="#0F172A" />
+        </Border.Effect>
+
+        <StackPanel>
+            <Grid x:Name="Header" Height="24" Background="Transparent"
+                  MouseLeftButtonDown="Header_MouseLeftButtonDown">
+                <TextBlock Text="CryptoWatcher" FontSize="11" VerticalAlignment="Center"
+                           Foreground="{StaticResource TextMutedBrush}" />
+                <Button Style="{StaticResource IconButton}" Width="24" Height="24"
+                        HorizontalAlignment="Right" VerticalAlignment="Center"
+                        Click="Restore_Click" ToolTip="恢复主界面">
+                    <TextBlock Text="&#xE73F;" Style="{StaticResource GlyphText}" FontSize="11" />
+                </Button>
+            </Grid>
+
+            <ItemsControl ItemsSource="{Binding}" Margin="0,4,0,0">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Height="30">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="{Binding Key}" FontSize="12.5"
+                                       VerticalAlignment="Center"
+                                       Foreground="{StaticResource TextPrimaryBrush}" />
+
+                            <TextBlock Grid.Column="1" Text="{Binding PriceText}" Margin="10,0,0,0"
+                                       FontSize="13.5" FontWeight="SemiBold" VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Direction}" Value="up">
+                                                <Setter Property="Foreground" Value="{StaticResource RiseBrush}" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Direction}" Value="down">
+                                                <Setter Property="Foreground" Value="{StaticResource FallBrush}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </Border>
+</Window>

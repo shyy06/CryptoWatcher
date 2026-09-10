@@ -44,6 +44,10 @@ namespace CryptoWatcher.Models
             (CybermoneyName ?? "").ToUpperInvariant(),
             (CurrencyName ?? "").ToUpperInvariant());
 
+        /// <summary>仅币种代码（大写）。迷你窗等紧凑场景只显示这个，不显示货币对：BTC</summary>
+        [JsonIgnore]
+        public string Symbol => (CybermoneyName ?? "").ToUpperInvariant();
+
         /// <summary>行情来源与耗时，例如 "OKX · 38ms"</summary>
         [JsonIgnore]
         public string Status

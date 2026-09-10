@@ -270,7 +270,7 @@ namespace CryptoWatcher
             _mini.PlaceNear(this);
             _mini.Show();
             Hide();
-            StatusText = "已切换到迷你模式（双击迷你窗可恢复主界面）";
+            StatusText = "已切换到迷你模式（双击迷你窗顶部可恢复主界面）";
         }
 
         public void RestoreMainWindow()

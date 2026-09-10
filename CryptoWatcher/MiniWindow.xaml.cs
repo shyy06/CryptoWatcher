@@ -6,7 +6,7 @@ using CryptoWatcher.Services;
 namespace CryptoWatcher
 {
     /// <summary>
-    /// 桌面常驻迷你窗：无边框圆角卡片，可拖动、可锁定位置、可鼠标穿透。
+    /// 桌面常驻迷你窗：极窄隐蔽条，可拖动、可锁定位置、可鼠标穿透、可取消置顶。
     /// 与主窗口共享同一个监测项集合。
     /// </summary>
     public partial class MiniWindow : Window
@@ -25,6 +25,7 @@ namespace CryptoWatcher
             _owner = owner;
             DataContext = items;
 
+            TopmostItem.IsChecked = Topmost;
             LockItem.IsChecked = owner.MiniLocked;
             ThroughItem.IsChecked = owner.MiniClickThrough;
         }
@@ -57,8 +58,8 @@ namespace CryptoWatcher
         {
             try
             {
-                Left = source.Left + 60;
-                Top = source.Top + 60;
+                Left = source.Left + 40;
+                Top = source.Top + 40;
             }
             catch (Exception ex)
             {
@@ -106,8 +107,15 @@ namespace CryptoWatcher
             }
         }
 
+        /// <summary>拖拽条：单击拖动位置，双击恢复主界面（锁定位置时仍可双击）</summary>
         private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            if (e.ClickCount >= 2)
+            {
+                if (_owner != null) _owner.RestoreMainWindow();
+                return;
+            }
+
             if (LockItem.IsChecked) return;
 
             try { DragMove(); }
@@ -116,7 +124,13 @@ namespace CryptoWatcher
 
         private void Restore_Click(object sender, RoutedEventArgs e)
         {
-            _owner.RestoreMainWindow();
+            if (_owner != null) _owner.RestoreMainWindow();
+        }
+
+        /// <summary>取消置顶后，迷你窗会被其他窗口盖住，进一步降低存在感</summary>
+        private void Topmost_Click(object sender, RoutedEventArgs e)
+        {
+            Topmost = TopmostItem.IsChecked;
         }
 
         private void Lock_Click(object sender, RoutedEventArgs e)

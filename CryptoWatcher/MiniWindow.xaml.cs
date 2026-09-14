@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Windows.Interop;
+using System.Windows.Threading;
 using CryptoWatcher.Models;
 using CryptoWatcher.Services;
 
@@ -13,6 +14,9 @@ namespace CryptoWatcher
     {
         private readonly MainWindow _owner;
         private bool _allowClose;
+
+        /// <summary>置顶守卫：周期性重新申明 HWND_TOPMOST，修复长时间运行后掉到最底层的问题。</summary>
+        private readonly DispatcherTimer _topmostGuard;
 
         public event Action<bool> LockStateChanged;
 
@@ -28,6 +32,14 @@ namespace CryptoWatcher
             TopmostItem.IsChecked = Topmost;
             LockItem.IsChecked = owner.MiniLocked;
             ThroughItem.IsChecked = owner.MiniClickThrough;
+
+            // 2.5s 的兜底：即便中途遇到息屏唤醒/分辨率变化/其他置顶窗口进出导致 z-order 被降级，
+            // 也能在很短时间内自动恢复置顶，用户基本无感。
+            _topmostGuard = new DispatcherTimer(DispatcherPriority.Background)
+            {
+                Interval = TimeSpan.FromMilliseconds(2500)
+            };
+            _topmostGuard.Tick += (s, e) => EnsureTopmost();
         }
 
         public bool IsLocked
@@ -76,6 +88,15 @@ namespace CryptoWatcher
         {
             base.OnSourceInitialized(e);
             ApplyClickThrough();
+            EnsureTopmost();
+            _topmostGuard.Start();
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            try { _topmostGuard.Stop(); }
+            catch (Exception ex) { Debug.WriteLine("[MiniWindow] 停止置顶守卫失败: " + ex.Message); }
+            base.OnClosed(e);
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -94,16 +115,48 @@ namespace CryptoWatcher
             base.OnClosing(e);
         }
 
+        protected override void OnActivated(EventArgs e)
+        {
+            base.OnActivated(e);
+            // 从主界面再次切回迷你模式（Show 复用同一实例）时，立即恢复置顶，
+            // 不必等守卫定时器下一拍。
+            EnsureTopmost();
+        }
+
         private void ApplyClickThrough()
         {
             try
             {
                 var helper = new WindowInteropHelper(this);
                 NativeMethods.SetClickThrough(helper.Handle, ThroughItem.IsChecked);
+
+                // 修改 GWL_EXSTYLE 会触发系统重估窗口样式，可能顺带降级 z-order；
+                // 这里立即补一次置顶申明，避免「勾选鼠标穿透后沉底」。
+                EnsureTopmost();
             }
             catch (Exception ex)
             {
                 Debug.WriteLine("[MiniWindow] 应用鼠标穿透失败: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// 在「期望置顶」且窗口可见时，重新向系统申明置顶（不抢焦点）。
+        /// 由置顶守卫定时器与若干生命周期节点调用。
+        /// </summary>
+        private void EnsureTopmost()
+        {
+            if (!IsVisible) return;
+            if (!TopmostItem.IsChecked) return; // 用户主动取消置顶时不干预
+
+            try
+            {
+                var helper = new WindowInteropHelper(this);
+                NativeMethods.ForceTopmost(helper.Handle);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("[MiniWindow] 恢复置顶失败: " + ex.Message);
             }
         }
 
@@ -127,10 +180,12 @@ namespace CryptoWatcher
             if (_owner != null) _owner.RestoreMainWindow();
         }
 
-        /// <summary>取消置顶后，迷你窗会被其他窗口盖住，进一步降低存在感</summary>
+        /// <summary>取消置顶后，迷你窗会被其他窗口盖住，进一步降低存在感；
+        /// 重新勾选时立即补一次置顶申明，无需等守卫定时器下一拍。</summary>
         private void Topmost_Click(object sender, RoutedEventArgs e)
         {
             Topmost = TopmostItem.IsChecked;
+            if (Topmost) EnsureTopmost();
         }
 
         private void Lock_Click(object sender, RoutedEventArgs e)

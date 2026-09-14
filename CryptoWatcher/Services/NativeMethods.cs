@@ -11,6 +11,16 @@ namespace CryptoWatcher.Services
         private const int WS_EX_TRANSPARENT = 0x00000020;
         private const int WS_EX_LAYERED = 0x00080000;
 
+        private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
+        private const uint SWP_NOSIZE = 0x0001;
+        private const uint SWP_NOMOVE = 0x0002;
+        private const uint SWP_NOACTIVATE = 0x0010;
+        private const uint SWP_NOOWNERZORDER = 0x0200;
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool SetWindowPos(
+            IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
         [DllImport("user32.dll", EntryPoint = "GetWindowLong", SetLastError = true)]
         private static extern IntPtr GetWindowLong32(IntPtr hWnd, int nIndex);
 
@@ -54,6 +64,29 @@ namespace CryptoWatcher.Services
             catch (Exception ex)
             {
                 Debug.WriteLine("[NativeMethods] 设置鼠标穿透失败: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// 强制把窗口重新钉回置顶（不改大小/位置、不抢焦点）。
+        /// 这是修复「迷你窗运行一段时间后掉到最底层」的关键：
+        /// WPF 的 Topmost 仅在设置/显示时向系统申明一次 WS_EX_TOPMOST，
+        /// 之后遇到息屏唤醒、分辨率变化、其他置顶窗口进出等系统事件时 z-order 可能被降级，
+        /// 且不会自动恢复。此处用 SetWindowPos(HWND_TOPMOST) 重新申明置顶。
+        /// 参数均为 SWP_NO* 标志，故不会移动窗口、不会改变大小、不会抢焦点。
+        /// </summary>
+        public static void ForceTopmost(IntPtr hWnd)
+        {
+            if (hWnd == IntPtr.Zero) return;
+
+            try
+            {
+                SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0,
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("[NativeMethods] 强制置顶失败: " + ex.Message);
             }
         }
     }

@@ -39,7 +39,7 @@ CryptoWatcherWpf/
    │  ├─ WebApis.cs             # 6 路竞速行情 + 市值 Top N
    │  ├─ PriceMonitor.cs        # 每项独立轮询循环 + 提醒判定 + 托盘通知
    │  ├─ CoinCatalog.cs         # 热门币种缓存
-   │  └─ NativeMethods.cs       # 鼠标穿透 P/Invoke（64 位安全）
+   │  └─ NativeMethods.cs       # 鼠标穿透 + 强制置顶 P/Invoke（64 位安全）
    ├─ MainWindow.xaml(.cs)      # 主界面
    ├─ MiniWindow.xaml(.cs)      # 桌面常驻迷你窗
    └─ Views/
@@ -98,6 +98,12 @@ build-release.bat portable
   币种名灰化弱化，视觉只突出价格（涨红跌绿）。
   可拖拽（顶部窄条）、可锁定位置、可鼠标穿透、可取消"总在最前"；
   **双击顶部窄条即恢复主界面**，右键菜单同样可恢复。
+  **置顶已加固**：WPF 的 `Topmost` 只会在窗口创建/显示那一刻向系统申明一次，
+  之后遇到息屏唤醒、分辨率变化、其他置顶窗口进出等系统事件时，z-order 可能被降级且不会自动恢复，
+  表现为"运行久了就沉到最底层"。现已加 **2.5s 置顶守卫**（`DispatcherTimer` → `SetWindowPos(HWND_TOPMOST)`，
+  带 `SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE`，不移动、不缩放、不抢焦点），
+  并在「显示 / 重新勾选总在最前 / 切换鼠标穿透」时立即补申明。
+  取消勾选「总在最前」后守卫自动停止，行为与旧版一致。
   想再调：改 `CryptoWatcher/MiniWindow.xaml` 的 `Width`、卡片 `Background` 前两位 alpha、
   以及行内的 `FontSize` / `Height`。
   > 宽度下限提示：内容区 = `Width - 28`。实测最长币种名 `MATIC`(29px) + 最长价格 `0.17430000`(66px)
@@ -139,6 +145,7 @@ build-release.bat portable
 ## 7. 验证记录
 
 - `dotnet build -c Release`：**0 警告 0 错误**
-- `dotnet publish` 单文件产物：仅 `CryptoWatcher.exe` 一个文件
+- `dotnet publish` 单文件产物：仅 `CryptoWatcher.exe` 一个文件（约 229 KB）
 - 启动自检：进程正常存活、主窗口句柄有效、标题 `CryptoWatcher`、无崩溃日志
 - 行情接口：5/6 家实测返回数据且字段与解析代码一致
+- **置顶加固（本轮）**：编译 0 警告 0 错误；启动自检进程存活、句柄有效、`error.log` 未生成
